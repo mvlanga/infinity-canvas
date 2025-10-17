@@ -1,37 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type Konva from "konva";
-import { useEffect, useRef, useState } from "react";
-import { Image, Layer, Stage } from "react-konva";
-import useImage from "use-image";
+import { useRef, useState } from "react";
+import { Layer, Stage } from "react-konva";
+import type { CanvasLayerProps } from "@/components/CanvasLayer.tsx";
+import { CanvasLayer } from "@/components/CanvasLayer.tsx";
+import { useScreenSize } from "@/utils/useScreenSize.ts";
 
 export const Route = createFileRoute("/")({
 	component: App,
 });
 
-const URLImage = ({ src, ...rest }: { src: string } & Konva.NodeConfig) => {
-	const [image] = useImage(src, "anonymous");
-	return <Image image={image} {...rest} />;
-};
+const layers: CanvasLayerProps[] = [
+	{
+		src: "1.png",
+		width: 3583,
+		height: 2406,
+		x: 0,
+		y: 0,
+		scale: 1,
+		children: [
+			{
+				src: "2.png",
+				width: 1892,
+				height: 2565,
+				x: 2255,
+				y: 1382,
+				scale: 0.005,
+				children: [
+					{
+						src: "3.png",
+						width: 0.25,
+						height: 0.25,
+						x: 6.9,
+						y: 5.4,
+						scale: 1,
+					},
+				],
+			},
+		],
+	},
+];
 
 function App() {
 	const stageRef = useRef<null | Konva.Stage>(null);
 
-	const [size, setSize] = useState({
-		width: window.innerWidth,
-		height: window.innerHeight,
-	});
-
-	useEffect(() => {
-		const handleResize = () => {
-			setSize({
-				width: document.documentElement.clientWidth,
-				height: document.documentElement.clientHeight,
-			});
-		};
-
-		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
-	}, []);
+	const { width: screenWidth, height: screenHeight } = useScreenSize();
 
 	const [lastDist, setLastDist] = useState<number | null>(null);
 	const [lastCenter, setLastCenter] = useState<{ x: number; y: number } | null>(
@@ -55,7 +68,7 @@ function App() {
 
 		const direction = e.evt.deltaY > 0 ? 1 / scaleBy : scaleBy;
 		const newScale = oldScale * direction;
-		if (newScale < 0.2) return;
+		if (newScale < 0.1) return;
 
 		const newPos = {
 			x: pointer.x - mousePointTo.x * newScale,
@@ -98,7 +111,7 @@ function App() {
 			const oldScale = stage.scaleX();
 			const scaleBy = dist / lastDist;
 			const newScale = oldScale * scaleBy;
-			if (newScale < 0.2) return;
+			if (newScale < 0.1) return;
 
 			const stagePos = stage.position();
 
@@ -131,25 +144,23 @@ function App() {
 	};
 
 	return (
-		<Stage
-			ref={stageRef}
-			width={size.width}
-			height={size.height}
-			draggable
-			onWheel={handleWheel}
-			onTouchMove={handleTouchMove}
-			onTouchEnd={handleTouchEnd}
-			onTouchCancel={handleTouchEnd}
-		>
-			<Layer imageSmoothingEnabled={false}>
-				<URLImage src="1.png" />
-				<URLImage
-					src="2.png"
-					x={2255}
-					y={1382}
-					scale={{ x: 0.005, y: 0.005 }}
-				/>
-			</Layer>
-		</Stage>
+		<main>
+			<Stage
+				ref={stageRef}
+				width={screenWidth}
+				height={screenHeight}
+				draggable
+				onWheel={handleWheel}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={handleTouchEnd}
+				onTouchCancel={handleTouchEnd}
+			>
+				<Layer imageSmoothingEnabled={false}>
+					{layers.map((layer) => (
+						<CanvasLayer key={layer.src} {...layer} />
+					))}
+				</Layer>
+			</Stage>
+		</main>
 	);
 }
