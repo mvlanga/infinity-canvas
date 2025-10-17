@@ -9,50 +9,68 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as ViewRouteImport } from './routes/view'
+import { Route as EditRouteImport } from './routes/edit'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ViewRoute = ViewRouteImport.update({
+  id: '/view',
+  path: '/view',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditRoute = EditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/edit': typeof EditRoute
+  '/view': typeof ViewRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/edit': typeof EditRoute
+  '/view': typeof ViewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/edit': typeof EditRoute
+  '/view': typeof ViewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/edit' | '/view'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/edit' | '/view'
+  id: '__root__' | '/edit' | '/view'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  EditRoute: typeof EditRoute
+  ViewRoute: typeof ViewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/view': {
+      id: '/view'
+      path: '/view'
+      fullPath: '/view'
+      preLoaderRoute: typeof ViewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/edit': {
+      id: '/edit'
+      path: '/edit'
+      fullPath: '/edit'
+      preLoaderRoute: typeof EditRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  EditRoute: EditRoute,
+  ViewRoute: ViewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

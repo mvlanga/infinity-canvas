@@ -4,6 +4,7 @@ import { Group } from "react-konva";
 import { CanvasImage } from "@/components/CanvasImage.tsx";
 
 export type CanvasLayerProps = {
+	id: string;
 	src: string;
 	width: number;
 	height: number;
@@ -14,6 +15,7 @@ export type CanvasLayerProps = {
 };
 
 export const CanvasLayer = ({
+	id,
 	src,
 	width,
 	height,
@@ -33,7 +35,7 @@ export const CanvasLayer = ({
 	}, []);
 
 	return (
-		<Group ref={groupRef} x={x} y={y}>
+		<Group name={id} ref={groupRef} x={x} y={y}>
 			<CanvasImage
 				src={src}
 				width={width}
@@ -42,7 +44,7 @@ export const CanvasLayer = ({
 				scaleY={scale}
 			/>
 			{children?.map((child) => (
-				<CanvasLayer key={child.src} {...child} />
+				<CanvasLayer key={child.id} {...child} />
 			))}
 		</Group>
 	);

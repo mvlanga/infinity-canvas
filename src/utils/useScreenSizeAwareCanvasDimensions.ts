@@ -1,4 +1,4 @@
-import type { CanvasLayerProps } from "@/components/CanvasLayer.tsx";
+import type { CanvasLayerProps } from "@/features/infinity-canvas-editor/components/CanvasLayer.tsx";
 import { getFitDirection } from "@/utils/common.ts";
 
 export const useScreenSizeAwareCanvasDimensions = (
