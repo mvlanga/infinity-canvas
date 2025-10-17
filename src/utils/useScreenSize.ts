@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export const useScreenSize = () => {
 	const [width, setWidth] = useState<number>(
@@ -19,7 +19,15 @@ export const useScreenSize = () => {
 		return () => window.removeEventListener("resize", handleResize);
 	}, []);
 
+	const initialWidth = useMemo(() => document.documentElement.clientWidth, []);
+	const initialHeight = useMemo(
+		() => document.documentElement.clientHeight,
+		[],
+	);
+
 	return {
+		initialWidth,
+		initialHeight,
 		width,
 		height,
 	};

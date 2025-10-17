@@ -5,46 +5,61 @@ import { Layer, Stage } from "react-konva";
 import type { CanvasLayerProps } from "@/components/CanvasLayer.tsx";
 import { CanvasLayer } from "@/components/CanvasLayer.tsx";
 import { useScreenSize } from "@/utils/useScreenSize.ts";
+import {
+	useScreenSizeAwareCanvasDimensions,
+	useScreenSizeAwareCanvasOffset,
+} from "@/utils/useScreenSizeAwareCanvasDimensions.ts";
 
 export const Route = createFileRoute("/")({
 	component: App,
 });
 
-const layers: CanvasLayerProps[] = [
-	{
-		src: "1.png",
-		width: 3583,
-		height: 2406,
-		x: 0,
-		y: 0,
-		scale: 1,
-		children: [
-			{
-				src: "2.png",
-				width: 1892,
-				height: 2565,
-				x: 2255,
-				y: 1382,
-				scale: 0.005,
-				children: [
-					{
-						src: "3.png",
-						width: 0.25,
-						height: 0.25,
-						x: 6.9,
-						y: 5.4,
-						scale: 1,
-					},
-				],
-			},
-		],
-	},
-];
+const layers: CanvasLayerProps = {
+	src: "1.png",
+	width: 3583,
+	height: 2406,
+	x: 0,
+	y: 0,
+	scale: 1,
+	children: [
+		{
+			src: "red.webp",
+			width: 200,
+			height: 200,
+			x: 0,
+			y: 0,
+			scale: 1,
+		},
+		{
+			src: "2.png",
+			width: 1892,
+			height: 2565,
+			x: 2255,
+			y: 1382,
+			scale: 0.005,
+			children: [
+				{
+					src: "3.png",
+					width: 0.25,
+					height: 0.25,
+					x: 6.9,
+					y: 5.4,
+					scale: 1,
+				},
+			],
+		},
+	],
+};
 
 function App() {
 	const stageRef = useRef<null | Konva.Stage>(null);
 
-	const { width: screenWidth, height: screenHeight } = useScreenSize();
+	const {
+		initialWidth: initialScreenWidth,
+		initialHeight: initialScreenHeight,
+		width: screenWidth,
+		height: screenHeight,
+	} = useScreenSize();
 
 	const [lastDist, setLastDist] = useState<number | null>(null);
 	const [lastCenter, setLastCenter] = useState<{ x: number; y: number } | null>(
@@ -143,6 +158,20 @@ function App() {
 		if (stage) stage.draggable(true); // re-enable drag
 	};
 
+	const firstCanvasLayer = layers;
+
+	const firstCanvasLayerDimensions = useScreenSizeAwareCanvasDimensions(
+		initialScreenWidth,
+		initialScreenHeight,
+		firstCanvasLayer,
+	);
+
+	const stageOffset = useScreenSizeAwareCanvasOffset(
+		initialScreenWidth,
+		initialScreenHeight,
+		firstCanvasLayerDimensions,
+	);
+
 	return (
 		<main>
 			<Stage
@@ -154,11 +183,14 @@ function App() {
 				onTouchMove={handleTouchMove}
 				onTouchEnd={handleTouchEnd}
 				onTouchCancel={handleTouchEnd}
+				offset={stageOffset}
 			>
 				<Layer imageSmoothingEnabled={false}>
-					{layers.map((layer) => (
-						<CanvasLayer key={layer.src} {...layer} />
-					))}
+					<CanvasLayer
+						key={firstCanvasLayer.src}
+						{...firstCanvasLayer}
+						{...firstCanvasLayerDimensions}
+					/>
 				</Layer>
 			</Stage>
 		</main>
